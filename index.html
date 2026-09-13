@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的个人博客</title>
     <link rel="stylesheet" href="./css/style.css">
-    <!-- 只需要引入 Three.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- 换成国内可访问的 CDN，避免网络问题导致粒子加载失败 -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
@@ -115,7 +115,6 @@
             const time = clock.getElapsedTime();
 
             // 自动呼吸效果：使用正弦波控制聚合度，周期约为 6 秒
-            // Math.sin 的值域是 [-1, 1]，通过 (sin + 1) / 2 映射到 [0, 1]
             targetGatherFactor = (Math.sin(time * 1.0) + 1) / 2;
 
             // 平滑过渡聚合系数 (Lerp)

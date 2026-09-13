@@ -1,10 +1,15 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+html, body {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #050510; /* 深邃暗夜蓝黑 */
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     line-height: 1.6;
     color: #e0e0e0;
-    background-color: #050510; /* 深邃暗夜蓝黑 */
     overflow-x: hidden;
 }
 
@@ -13,22 +18,22 @@ body {
     position: fixed;
     top: 0; left: 0;
     width: 100vw; height: 100vh;
-    z-index: -1;
+    z-index: 0; /* 放在背景色之上 */
     pointer-events: none; /* 鼠标事件穿透 */
 }
 
 /* 博客内容容器 - 磨砂玻璃效果 */
 .blog-wrapper {
     position: relative;
-    z-index: 1;
+    z-index: 1; /* 确保内容在粒子之上 */
     max-width: 800px;
     margin: 60px auto;
     padding: 30px 40px;
-    background: rgba(15, 20, 30, 0.65); /* 深色半透明 */
+    background: rgba(15, 20, 30, 0.65);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-radius: 16px;
-    border: 1px solid rgba(0, 229, 255, 0.2); /* 青色边框 */
+    border: 1px solid rgba(0, 229, 255, 0.2);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
 }
 
@@ -49,7 +54,7 @@ nav {
 
 nav a {
     text-decoration: none;
-    color: #00e5ff; /* 科技青色 */
+    color: #00e5ff;
     font-weight: 500;
     transition: color 0.3s;
 }
