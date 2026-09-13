@@ -100,3 +100,29 @@ footer {
     color: #888;
     font-size: 0.9em;
 }
+
+/* 加载遮罩层 */
+#loading-mask {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background-color: #050510;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.loading-text {
+    color: #00e5ff;
+    font-size: 1.2em;
+    letter-spacing: 2px;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
