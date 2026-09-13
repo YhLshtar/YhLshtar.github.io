@@ -1,288 +1,208 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>测试页面 - Test Page</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container { max-width: 1000px; margin: 0 auto; }
-        header {
-            background: white; border-radius: 12px; padding: 30px;
-            text-align: center; margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        header h1 { color: #333; margin-bottom: 10px; }
-        header p { color: #666; }
-        .card {
-            background: white; border-radius: 12px; padding: 25px;
-            margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .card h2 {
-            color: #444; margin-bottom: 15px; padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
-        }
-        /* 按钮样式 */
-        .btn {
-            display: inline-block; padding: 10px 20px; margin: 5px;
-            border: none; border-radius: 6px; cursor: pointer;
-            font-size: 14px; transition: all 0.3s;
-        }
-        .btn-primary { background: #667eea; color: white; }
-        .btn-primary:hover { background: #5568d3; transform: translateY(-2px); }
-        .btn-success { background: #48bb78; color: white; }
-        .btn-success:hover { background: #38a169; }
-        .btn-danger { background: #f56565; color: white; }
-        .btn-danger:hover { background: #e53e3e; }
-        /* 表单样式 */
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; color: #555; font-weight: 500; }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%; padding: 10px; border: 1px solid #ddd;
-            border-radius: 6px; font-size: 14px;
-        }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            outline: none; border-color: #667eea;
-        }
-        /* 表格样式 */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: #f7fafc; color: #444; font-weight: 600; }
-        tr:hover { background: #f0f4ff; }
-        /* 颜色块 */
-        .color-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; }
-        .color-box { height: 80px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
-        /* 交互反馈区 */
-        #output {
-            background: #f0f4ff; padding: 15px; border-radius: 6px;
-            margin-top: 15px; min-height: 50px; font-family: monospace;
-        }
-        .tag {
-            display: inline-block; background: #667eea; color: white;
-            padding: 4px 12px; border-radius: 20px; font-size: 12px; margin: 3px;
-        }
-        .flex-demo { display: flex; gap: 10px; flex-wrap: wrap; }
-        .flex-item {
-            flex: 1; min-width: 150px; background: #f7fafc;
-            padding: 20px; border-radius: 8px; text-align: center;
-        }
-        #counter { font-size: 36px; color: #667eea; font-weight: bold; text-align: center; }
-    </style>
-<base target="_blank">
+ <meta charset="UTF-8">
+ <title>WebGL 手势控制爱心粒子</title>
+ <style>
+     body { margin: 0; overflow: hidden; background-color: #000; }
+     #canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
+     /* 隐藏摄像头视频流，只用于后台分析 */
+     .input_video { display: none; }
+     #loading {
+         position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+         color: white; font-family: sans-serif; font-size: 24px; pointer-events: none; z-index: 10;
+     }
+ </style>
+ <!-- 引入 Three.js -->
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+ <!-- 引入 MediaPipe Hands -->
+ <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+ <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+ <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+ <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🧪 网页测试中心</h1>
-            <p>用于测试 HTML / CSS / JavaScript 渲染效果</p>
-            <p style="margin-top: 10px; font-size: 14px; color: #999;">
-                当前时间：<span id="current-time"></span>
-            </p>
-        </header>
 
-        <!-- 按钮测试 -->
-        <div class="card">
-            <h2>🔘 按钮交互测试</h2>
-            <button class="btn btn-primary" onclick="showMessage('你点击了主要按钮！')">主要按钮</button>
-            <button class="btn btn-success" onclick="showMessage('操作成功！')">成功按钮</button>
-            <button class="btn btn-danger" onclick="showMessage('危险操作！')">危险按钮</button>
-            <button class="btn" style="background: #718096; color: white;" onclick="changeBg()">切换背景</button>
-            <div id="output">点击按钮查看效果...</div>
-        </div>
+<div id="loading">正在加载模型与摄像头...<br>请允许摄像头权限</div>
+<div id="canvas-container"></div>
+<video class="input_video"></video>
 
-        <!-- 计数器 -->
-        <div class="card">
-            <h2>🔢 计数器测试</h2>
-            <div id="counter">0</div>
-            <div style="text-align: center; margin-top: 10px;">
-                <button class="btn btn-primary" onclick="updateCounter(-1)">-1</button>
-                <button class="btn btn-danger" onclick="resetCounter()">重置</button>
-                <button class="btn btn-success" onclick="updateCounter(1)">+1</button>
-            </div>
-        </div>
+<script>
+ // --- 1. Three.js 场景初始化 ---
+ const scene = new THREE.Scene();
+ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+ camera.position.z = 30;
 
-        <!-- 表单测试 -->
-        <div class="card">
-            <h2>📝 表单元素测试</h2>
-            <form onsubmit="return handleSubmit(event)">
-                <div class="form-group">
-                    <label>用户名</label>
-                    <input type="text" id="username" placeholder="请输入用户名">
-                </div>
-                <div class="form-group">
-                    <label>邮箱</label>
-                    <input type="email" id="email" placeholder="test@example.com">
-                </div>
-                <div class="form-group">
-                    <label>密码</label>
-                    <input type="password" id="password" placeholder="请输入密码">
-                </div>
-                <div class="form-group">
-                    <label>城市</label>
-                    <select id="city">
-                        <option>北京</option>
-                        <option>上海</option>
-                        <option>广州</option>
-                        <option>深圳</option>
-                        <option>其他城市</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>备注</label>
-                    <textarea rows="3" placeholder="请输入备注信息..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label><input type="checkbox" id="agree"> 我已阅读并同意服务条款</label>
-                </div>
-                <button type="submit" class="btn btn-primary">提交表单</button>
-            </form>
-        </div>
+ const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+ renderer.setSize(window.innerWidth, window.innerHeight);
+ document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-        <!-- 表格测试 -->
-        <div class="card">
-            <h2>📊 表格渲染测试</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>名称</th>
-                        <th>类别</th>
-                        <th>状态</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>001</td>
-                        <td>测试项目 A</td>
-                        <td><span class="tag">前端</span></td>
-                        <td style="color: #48bb78;">✓ 正常</td>
-                        <td><button class="btn btn-primary" style="padding: 4px 12px; font-size: 12px;">编辑</button></td>
-                    </tr>
-                    <tr>
-                        <td>002</td>
-                        <td>测试项目 B</td>
-                        <td><span class="tag" style="background: #48bb78;">后端</span></td>
-                        <td style="color: #48bb78;">✓ 正常</td>
-                        <td><button class="btn btn-primary" style="padding: 4px 12px; font-size: 12px;">编辑</button></td>
-                    </tr>
-                    <tr>
-                        <td>003</td>
-                        <td>测试项目 C</td>
-                        <td><span class="tag" style="background: #f56565;">紧急</span></td>
-                        <td style="color: #f56565;">✗ 异常</td>
-                        <td><button class="btn btn-primary" style="padding: 4px 12px; font-size: 12px;">编辑</button></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+ // --- 2. 创建爱心粒子系统 ---
+ const particleCount = 3000; // 粒子数量
+ const geometry = new THREE.BufferGeometry();
+ const positions = new Float32Array(particleCount * 3);
+ const targetPositions = new Float32Array(particleCount * 3); // 存储爱心形状的目标位置
+ const randomPositions = new Float32Array(particleCount * 3); // 存储散开时的随机位置
 
-        <!-- 颜色测试 -->
-        <div class="card">
-            <h2>🎨 颜色显示测试</h2>
-            <div class="color-grid">
-                <div class="color-box" style="background: #667eea;">#667eea</div>
-                <div class="color-box" style="background: #48bb78;">#48bb78</div>
-                <div class="color-box" style="background: #f56565;">#f56565</div>
-                <div class="color-box" style="background: #ecc94b;">#ecc94b</div>
-                <div class="color-box" style="background: #9f7aea;">#9f7aea</div>
-                <div class="color-box" style="background: #333333;">#333333</div>
-            </div>
-        </div>
+ // 爱心方程函数
+ function getHeartPosition(t, scale = 1) {
+     const x = 16 * Math.pow(Math.sin(t), 3);
+     const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+     const z = 0; 
+     return { x: x * scale, y: y * scale, z: z * scale };
+ }
 
-        <!-- 布局测试 -->
-        <div class="card">
-            <h2>📐 Flex 布局测试</h2>
-            <div class="flex-demo">
-                <div class="flex-item">弹性项 1</div>
-                <div class="flex-item">弹性项 2</div>
-                <div class="flex-item">弹性项 3</div>
-                <div class="flex-item">弹性项 4</div>
-            </div>
-        </div>
+ for (let i = 0; i < particleCount; i++) {
+     // 生成爱心形状的目标点
+     // 为了让爱心立体一点，我们随机分布t，并在Z轴加一点随机扰动
+     const t = Math.random() * Math.PI * 2;
+     const scale = 0.5; 
+     const heartPos = getHeartPosition(t, scale);
+     
+     // 填充爱心内部 (随机缩放)
+     const r = Math.sqrt(Math.random()); 
+     
+     targetPositions[i * 3] = heartPos.x * r;
+     targetPositions[i * 3 + 1] = heartPos.y * r;
+     targetPositions[i * 3 + 2] = (Math.random() - 0.5) * 5; // Z轴厚度
 
-        <!-- 媒体测试 -->
-        <div class="card">
-            <h2>🖼️ 图片与媒体测试</h2>
-            <p style="margin-bottom: 10px; color: #666;">占位图测试（使用 SVG 内联）：</p>
-            <svg width="100%" height="150" style="background: #f0f4ff; border-radius: 8px;">
-                <rect x="20" y="20" width="100" height="100" fill="#667eea" rx="8"/>
-                <circle cx="180" cy="70" r="50" fill="#48bb78"/>
-                <polygon points="300,120 350,20 400,120" fill="#f56565"/>
-                <text x="450" y="80" fill="#333" font-size="24">SVG 测试</text>
-            </svg>
-            <audio controls style="width: 100%; margin-top: 15px;">
-                <source src="#" type="audio/mpeg">
-                您的浏览器不支持音频播放
-            </audio>
-        </div>
-    </div>
+     // 生成散开的随机位置 (爆炸效果)
+     randomPositions[i * 3] = (Math.random() - 0.5) * 100;
+     randomPositions[i * 3 + 1] = (Math.random() - 0.5) * 60;
+     randomPositions[i * 3 + 2] = (Math.random() - 0.5) * 50;
 
-    <script>
-        // 显示当前时间
-        function updateTime() {
-            const now = new Date();
-            document.getElementById('current-time').textContent = now.toLocaleString('zh-CN');
-        }
-        updateTime();
-        setInterval(updateTime, 1000);
+     // 初始位置设为散开状态
+     positions[i * 3] = randomPositions[i * 3];
+     positions[i * 3 + 1] = randomPositions[i * 3 + 1];
+     positions[i * 3 + 2] = randomPositions[i * 3 + 2];
+ }
 
-        // 消息提示
-        function showMessage(msg) {
-            const output = document.getElementById('output');
-            output.innerHTML = '<span style="color: #667eea;">' + new Date().toLocaleTimeString() + '</span>：' + msg;
-        }
+ geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
-        // 切换背景
-        let bgIndex = 0;
-        const gradients = [
-            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-            'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-            'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
-        ];
-        function changeBg() {
-            bgIndex = (bgIndex + 1) % gradients.length;
-            document.body.style.background = gradients[bgIndex];
-        }
+ // 粒子材质
+ const material = new THREE.PointsMaterial({
+     color: 0xff69b4, // 热粉色
+     size: 0.4,
+     transparent: true,
+     opacity: 0.8,
+     blending: THREE.AdditiveBlending
+ });
 
-        // 计数器
-        let count = 0;
-        function updateCounter(val) {
-            count += val;
-            document.getElementById('counter').textContent = count;
-        }
-        function resetCounter() {
-            count = 0;
-            document.getElementById('counter').textContent = count;
-        }
+ const particles = new THREE.Points(geometry, material);
+ scene.add(particles);
 
-        // 表单提交
-        function handleSubmit(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const email = document.getElementById('email').value;
-            const city = document.getElementById('city').value;
-            const agree = document.getElementById('agree').checked;
+ // --- 3. 交互逻辑变量 ---
+ let gatherFactor = 0; // 0 = 完全散开, 1 = 完全聚合成爱心
+ let targetGatherFactor = 0; // 目标聚合度，由手势控制
 
-            if (!username) { alert('请输入用户名！'); return false; }
-            if (!email) { alert('请输入邮箱！'); return false; }
-            if (!agree) { alert('请同意服务条款！'); return false; }
+ // --- 4. MediaPipe Hands 配置 ---
+ const videoElement = document.getElementsByClassName('input_video')[0];
 
-            alert('提交成功！\n用户名：' + username + '\n邮箱：' + email + '\n城市：' + city);
-            return false;
-        }
+ function onResults(results) {
+     document.getElementById('loading').style.display = 'none';
 
-        // 控制台测试
-        console.log('%c🧪 测试页面已加载', 'color: #667eea; font-size: 16px; font-weight: bold;');
-        console.log('User Agent:', navigator.userAgent);
-        console.log('屏幕尺寸:', window.screen.width + 'x' + window.screen.height);
-    </script>
+     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+         const landmarks = results.multiHandLandmarks[0];
+
+         // 计算手掌开合程度
+         // 简单算法：计算拇指指尖(4)与其他四指指尖(8,12,16,20)到手腕(0)的平均距离
+         const wrist = landmarks[0];
+         const fingerTips = [4, 8, 12, 16, 20];
+         let totalDist = 0;
+
+         fingerTips.forEach(idx => {
+             const tip = landmarks[idx];
+             const dist = Math.sqrt(
+                 Math.pow(tip.x - wrist.x, 2) + 
+                 Math.pow(tip.y - wrist.y, 2)
+             );
+             totalDist += dist;
+         });
+
+         const avgDist = totalDist / 5;
+
+         // 经验阈值：
+         // 握拳时，指尖距离手腕很近 (avgDist 约 0.1 - 0.2)
+         // 张开时，指尖距离手腕较远 (avgDist 约 0.4 - 0.6)
+         // 我们做一个映射：握拳(distance small) -> 聚合(factor 1), 张开 -> 散开(factor 0)
+         
+         // 动态调整这些阈值以适应摄像头的距离
+         const closeThreshold = 0.25; 
+         const openThreshold = 0.5;
+
+         let normalized = (avgDist - closeThreshold) / (openThreshold - closeThreshold);
+         normalized = 1 - Math.min(Math.max(normalized, 0), 1); // 反转：距离越小(握拳)，值越大(1)
+
+         targetGatherFactor = normalized; 
+
+     } else {
+         // 如果没有检测到手，默认缓慢散开
+         targetGatherFactor = 0;
+     }
+ }
+
+ const hands = new Hands({locateFile: (file) => {
+     return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+ }});
+
+ hands.setOptions({
+     maxNumHands: 1,
+     modelComplexity: 1,
+     minDetectionConfidence: 0.5,
+     minTrackingConfidence: 0.5
+ });
+
+ hands.onResults(onResults);
+
+ const cameraUtils = new Camera(videoElement, {
+     onFrame: async () => {
+         await hands.send({image: videoElement});
+     },
+     width: 640,
+     height: 480
+ });
+ cameraUtils.start();
+
+ // --- 5. 动画循环 ---
+ function animate() {
+     requestAnimationFrame(animate);
+
+     // 粒子自身旋转动画
+     particles.rotation.y += 0.002;
+
+     // 平滑过渡聚合系数 (Lerp)
+     gatherFactor += (targetGatherFactor - gatherFactor) * 0.05;
+
+     // 更新粒子位置
+     const posAttr = particles.geometry.attributes.position;
+     const currentPositions = posAttr.array;
+
+     for (let i = 0; i < particleCount; i++) {
+         const idx = i * 3;
+         
+         // 目标位置插值：从 randomPositions 过渡到 targetPositions
+         const tx = randomPositions[idx] + (targetPositions[idx] - randomPositions[idx]) * gatherFactor;
+         const ty = randomPositions[idx+1] + (targetPositions[idx+1] - randomPositions[idx+1]) * gatherFactor;
+         const tz = randomPositions[idx+2] + (targetPositions[idx+2] - randomPositions[idx+2]) * gatherFactor;
+
+         // 增加一点动态浮动效果
+         currentPositions[idx] += (tx - currentPositions[idx]) * 0.1;
+         currentPositions[idx+1] += (ty - currentPositions[idx+1]) * 0.1;
+         currentPositions[idx+2] += (tz - currentPositions[idx+2]) * 0.1;
+     }
+
+     posAttr.needsUpdate = true;
+     renderer.render(scene, camera);
+ }
+
+ animate();
+
+ // 窗口大小调整适配
+ window.addEventListener('resize', () => {
+     camera.aspect = window.innerWidth / window.innerHeight;
+     camera.updateProjectionMatrix();
+     renderer.setSize(window.innerWidth, window.innerHeight);
+ });
+</script>
 </body>
 </html>
